@@ -1,25 +1,25 @@
-import os
 import json
-import settings
+import os
 import typing
-from base64 import b64encode, b64decode
-from typing import Dict, Any
+from base64 import b64decode, b64encode
+from typing import Any
 
-from BaseClasses import Region, Entrance, Item, Tutorial, ItemClassification, Location
-from worlds.AutoWorld import World, WebWorld
-from worlds.LauncherComponents import Component, components, Type, SuffixIdentifier
+import settings
+from BaseClasses import Entrance, Item, ItemClassification, Location, Region, Tutorial
+from worlds.AutoWorld import WebWorld, World
+from worlds.LauncherComponents import Component, SuffixIdentifier, Type, components
 
+from ..LauncherComponents import icon_paths
 from . import Constants
 from .Container import MinecraftContainer
-from .Options import MinecraftOptions
-from .Structures import shuffle_structures
 from .ItemPool import build_item_pool, get_junk_item_names
+from .Options import MinecraftOptions
 from .Rules import set_rules
-from ..LauncherComponents import icon_paths
+from .Structures import shuffle_structures
 
 client_version = 10
 
-icon_paths['mcicon'] = f"ap:{__name__}/assets/mcicon.png"
+icon_paths["mcicon"] = f"ap:{__name__}/assets/mcicon.png"
 
 # register client
 def launch_client(*args):
@@ -32,7 +32,7 @@ components.append(
         icon="mcicon",
         func=launch_client,
         component_type=Type.CLIENT,
-        file_identifier=SuffixIdentifier('.apmc'),
+        file_identifier=SuffixIdentifier(".apmc"),
     )
 )
 
@@ -62,8 +62,8 @@ class MinecraftSettings(settings.Group):
                 raise ValueError(f"'{path}' must be a folder")
 
     server_directory: ServerDirectory = ServerDirectory("Minecraft AP Server Directory")
-    max_heap_size: str = "2G"
-    min_heap_size: str = "1G"
+    max_heap_size: str = "4G"
+    min_heap_size: str = "2G"
     release_channel: ReleaseChannel = ReleaseChannel("release")
     java: JavaExecutable = JavaExecutable("")
 
@@ -133,34 +133,34 @@ class MinecraftWorld(World):
     passthrough: dict[str, Any]
     ut_can_gen_without_yaml = True
 
-    def _get_mc_data(self) -> Dict[str, Any]:
+    def _get_mc_data(self) -> dict[str, Any]:
         exits = [connection[0] for connection in Constants.region_info["default_connections"]]
         return {
             # Mod data
-            'world_seed': self.random.getrandbits(32),
-            'seed_name': self.multiworld.seed_name,
-            'player_name': self.player_name,
-            'player_id': self.player,
-            'client_version': client_version,
-            'structures': {exit: self.multiworld.get_entrance(exit, self.player).connected_region.name for exit in exits},
-            'advancement_goal': self.options.advancement_goal.value,
-            'egg_shards_required': min(self.options.egg_shards_required.value,
+            "world_seed": self.random.getrandbits(32),
+            "seed_name": self.multiworld.seed_name,
+            "player_name": self.player_name,
+            "player_id": self.player,
+            "client_version": client_version,
+            "structures": {exit: self.multiworld.get_entrance(exit, self.player).connected_region.name for exit in exits},
+            "advancement_goal": self.options.advancement_goal.value,
+            "egg_shards_required": min(self.options.egg_shards_required.value,
                                        self.options.egg_shards_available.value),
-            'egg_shards_available': self.options.egg_shards_available.value,
-            'required_bosses': self.options.required_bosses.current_key,
-            'MC35': bool(self.options.send_defeated_mobs.value),
-            'death_link': bool(self.options.death_link.value),
-            'starting_items': json.dumps(self.options.starting_items.value),
-            'race': self.multiworld.is_race,
+            "egg_shards_available": self.options.egg_shards_available.value,
+            "required_bosses": self.options.required_bosses.current_key,
+            "MC35": bool(self.options.send_defeated_mobs.value),
+            "death_link": bool(self.options.death_link.value),
+            "starting_items": json.dumps(self.options.starting_items.value),
+            "race": self.multiworld.is_race,
 
             # Universal Tracker data
-            'bosses_to_defeat': self.options.required_bosses.value,
-            'shuffle_structures': self.options.shuffle_structures.value,
-            'structure_compasses': self.options.structure_compasses.value,
-            'combat_difficulty': self.options.combat_difficulty.value,
-            'include_hard_advancements': self.options.include_hard_advancements.value,
-            'include_unreasonable_advancements': self.options.include_unreasonable_advancements.value,
-            'include_postgame_advancements': self.options.include_postgame_advancements.value,
+            "bosses_to_defeat": self.options.required_bosses.value,
+            "shuffle_structures": self.options.shuffle_structures.value,
+            "structure_compasses": self.options.structure_compasses.value,
+            "combat_difficulty": self.options.combat_difficulty.value,
+            "include_hard_advancements": self.options.include_hard_advancements.value,
+            "include_unreasonable_advancements": self.options.include_unreasonable_advancements.value,
+            "include_postgame_advancements": self.options.include_postgame_advancements.value,
         }
 
     def generate_early(self: "MinecraftWorld") -> None:
@@ -272,6 +272,6 @@ class MinecraftItem(Item):
 
 def mc_update_output(raw_data, server, port):
     data = json.loads(b64decode(raw_data))
-    data['server'] = server
-    data['port'] = port
-    return b64encode(bytes(json.dumps(data), 'utf-8'))
+    data["server"] = server
+    data["port"] = port
+    return b64encode(bytes(json.dumps(data), "utf-8"))
